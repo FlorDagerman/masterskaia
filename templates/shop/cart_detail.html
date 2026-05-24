@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+    <h1>Корзина</h1>
+    {% if cart.cart.items %}
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>Товар</th><th>Цена</th><th>Кол-во</th><th>Сумма</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for product_id, item in cart.cart.items %}
+            <tr>
+                <td>{{ product_id }}</td>
+                <td>{{ item.price }} ₽</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }} ₽ × {{ item.quantity }}</td>   <!-- формула вместо вычисления -->
+                <td><a href="{% url 'remove_from_cart' product_id %}" class="btn btn-sm btn-danger">Удалить</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="3" class="text-end"><strong>Итого:</strong></td>
+                <td><strong>{{ cart.get_total_price|floatformat:2 }} ₽</strong></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <a href="{% url 'checkout' %}" class="btn btn-success">Оформить заказ</a>
+    {% else %}
+    <p>Корзина пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}

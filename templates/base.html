@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мастерская Вдохновения{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- НАВИГАЦИОННОЕ МЕНЮ (улучшенное) -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-success" href="{% url 'home' %}">
+            <i class="bi bi-brush"></i> Мастерская Вдохновения
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'masterclass_list' %}">
+                        <i class="bi bi-calendar-event"></i> Мастер-классы
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'idea_list' %}">
+                        <i class="bi bi-lightbulb"></i> Идеи
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'product_list' %}">
+                        <i class="bi bi-shop"></i> Магазин
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                    <!-- Выпадающее меню пользователя (аватар + имя) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="avatar" class="rounded-circle me-1" width="30" height="30" style="object-fit: cover;">
+                            {% else %}
+                                <i class="bi bi-person-circle me-1 fs-5"></i>
+                            {% endif %}
+                            <span>{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> Профиль</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Выход</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i> Вход
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">
+                            <i class="bi bi-person-plus"></i> Регистрация
+                        </a>
+                    </li>
+                {% endif %}
+                <!-- Корзина со счётчиком -->
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{% url 'cart_detail' %}">
+                        <i class="bi bi-cart3 fs-5"></i>
+                        <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ cart.get_total_items }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Основной блок -->
+<main class="container my-4">
+    {% block content %}
+    {% endblock %}
+</main>
+
+<!-- Подвал -->
+<footer class="bg-light text-center text-muted py-3 mt-5">
+    <div class="container">
+        <p class="mb-0">© 2026 Мастерская Вдохновения. Все права защищены.</p>
+    </div>
+</footer>
+
+<!-- Bootstrap JS (для работы выпадающего меню и каруселей) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Ваши собственные JS (если нужны) -->
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

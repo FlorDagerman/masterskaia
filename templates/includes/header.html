@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">🎨 Мастерская Вдохновения</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'masterclass_list' %}">Мастер-классы</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'idea_list' %}">Библиотека идей</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">Магазин</a></li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Личный кабинет</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Выход</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Вход</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Регистрация</a></li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cart_detail' %}">
+                        🛒 Корзина <span id="cart-count">{{ cart.get_total_items }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

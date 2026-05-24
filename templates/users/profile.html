@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет — Мастерская Вдохновения{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150?text=Avatar" alt="Аватар" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px;">
+                    {% endif %}
+                    <h4>{{ user.username }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    {% if user.phone %}
+                        <p><i class="bi bi-telephone"></i> {{ user.phone }}</p>
+                    {% endif %}
+                    <hr>
+                    <p><i class="bi bi-calendar-check"></i> Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+                    {% if user.is_subscribed %}
+                        <span class="badge bg-success">Подписан на новости</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Не подписан</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs" id="profileTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings" type="button">📅 Бронирования</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button">❤️ Избранное</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button">✏️ Редактировать профиль</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="bookings">
+                            {% if bookings %}
+                            <table class="table table-hover">
+                                <thead><tr><th>Мастер-класс</th><th>Дата</th><th>Статус</th><th></th></tr></thead>
+                                <tbody>{% for b in bookings %}
+                                <tr><td>{{ b.masterclass.title }}</td><td>{{ b.masterclass.schedule|date:"d.m.Y H:i" }}</td>
+                                <td>{% if b.status == 'pending' %}<span class="badge bg-warning">Ожидает оплаты</span>{% elif b.status == 'paid' %}<span class="badge bg-success">Оплачено</span>{% elif b.status == 'cancelled' %}<span class="badge bg-danger">Отменено</span>{% else %}<span class="badge bg-secondary">Проведено</span>{% endif %}</td>
+                                <td>{% if b.status == 'pending' %}<a href="{% url 'cancel_booking' b.id %}" class="btn btn-sm btn-outline-danger">Отменить</a>{% else %}—{% endif %}</td>
+                                </tr>{% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}<p>Бронирований нет.</p>{% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="favorites">
+                            {% if favorites %}
+                            <div class="row">{% for fav in favorites %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card"><div class="card-body"><h5>{{ fav.idea.title }}</h5><p>{{ fav.idea.content|truncatechars:80 }}</p>
+                                    <a href="{% url 'idea_detail' fav.idea.id %}" class="btn btn-sm btn-outline-primary">Читать</a>
+                                    <a href="{% url 'remove_from_favorites' fav.idea.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                                    </div><div class="card-footer"><small>Добавлено: {{ fav.added_at|date:"d.m.Y" }}</small></div></div>
+                                </div>{% endfor %}
+                            </div>{% else %}<p>Избранное пусто.</p>{% endif %}
+                        </div>
+                        <div class="tab-pane fade" id="profile">
+                            <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                                <div class="mb-3"><label>Email</label><input type="email" name="email" class="form-control" value="{{ form.email.value|default:'' }}"></div>
+                                <div class="mb-3"><label>Телефон</label><input type="text" name="phone" class="form-control" value="{{ form.phone.value|default:'' }}"></div>
+                                <div class="mb-3"><label>Аватар</label><input type="file" name="avatar" class="form-control"><small class="text-muted">Выберите новый аватар. Старый будет заменён.</small></div>
+                                <div class="mb-3 form-check"><input type="checkbox" name="is_subscribed" class="form-check-input" {% if form.is_subscribed.value %}checked{% endif %}><label class="form-check-label">Подписаться на новости</label></div>
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash;
+    if (hash === '#bookings') {
+        const tab = new bootstrap.Tab(document.querySelector('#bookings-tab'));
+        tab.show();
+    } else if (hash === '#favorites') {
+        const tab = new bootstrap.Tab(document.querySelector('#favorites-tab'));
+        tab.show();
+    } else if (hash === '#profile') {
+        const tab = new bootstrap.Tab(document.querySelector('#profile-tab'));
+        tab.show();
+    }
+});
+</script>
+{% endblock %}

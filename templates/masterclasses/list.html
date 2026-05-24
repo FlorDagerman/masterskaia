@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Мастер-классы</h1>
+<div class="row">
+    {% for mc in masterclass_list %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <img src="{{ mc.image.url }}" class="card-img-top" alt="{{ mc.title }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ mc.title }}</h5>
+                    <p class="card-text">{{ mc.description|truncatechars:100 }}</p>
+                    <p><strong>{{ mc.price }} руб.</strong> | Свободно мест: {{ mc.available_seats }}</p>
+                    <a href="{% url 'masterclass_detail' mc.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>Нет активных мастер-классов.</p>
+    {% endfor %}
+</div>
+{% include 'includes/pagination.html' %}
+{% endblock %}

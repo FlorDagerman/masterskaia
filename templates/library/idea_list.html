@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Левая колонка (список идей) -->
+        <div class="col-md-9">
+            <h1 class="mb-4">Библиотека вдохновения</h1>
+
+            <!-- Форма поиска -->
+            <form method="get" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Поиск по заголовку, содержанию или тегам..." value="{{ search_query }}">
+                    <button class="btn btn-primary" type="submit">Искать</button>
+                    {% if search_query %}
+                        <a href="{% url 'idea_list' %}" class="btn btn-outline-secondary">Сбросить</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            {% if idea_list %}
+                <div class="row">
+                    {% for idea in idea_list %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            {% if idea.cover_image %}
+                                <img src="{{ idea.cover_image.url }}" class="card-img-top" alt="{{ idea.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/300x200?text=Нет+изображения" class="card-img-top" alt="Placeholder">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ idea.title }}</h5>
+                                <p class="card-text">{{ idea.content|truncatechars:120 }}</p>
+                                <a href="{% url 'idea_detail' idea.pk %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                                {% if user.is_authenticated %}
+                                    <a href="{% url 'add_to_favorites' idea.pk %}" class="btn btn-outline-secondary btn-sm">❤️ В избранное</a>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer text-muted">
+                                <small>Опубликовано: {{ idea.created_at|date:"d.m.Y" }}</small><br>
+                                <small>Теги:
+                                    {% for tag in idea.tags.all %}
+                                        <a href="{% url 'idea_list' %}?tag={{ tag.name }}" class="badge bg-secondary text-decoration-none">{{ tag.name }}</a>
+                                    {% empty %}
+                                        <span class="text-muted">нет тегов</span>
+                                    {% endfor %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if is_paginated %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">« Первая</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Предыдущая</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Следующая</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tag %}&tag={{ request.GET.tag }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">Последняя »</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <p>Ничего не найдено. Попробуйте другой запрос.</p>
+            {% endif %}
+        </div>
+
+        <!-- Боковая панель с тегами -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Теги</h5>
+                </div>
+                <div class="card-body">
+                    {% if all_tags %}
+                        {% for tag in all_tags %}
+                            <a href="{% url 'idea_list' %}?tag={{ tag.name }}" class="badge bg-secondary text-decoration-none me-1 mb-1">{{ tag.name }}</a>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Теги отсутствуют</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
